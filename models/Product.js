@@ -16,10 +16,9 @@ const productSchema = new mongoose.Schema({
     required: true,
     min: 0,
   },
-  category: {
+  categoryId: {
     type: String,
     required: true,
-    trim: true,
   },
   brand: {
     type: String,
@@ -42,7 +41,7 @@ const productSchema = new mongoose.Schema({
     {
       user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // Reference to the User model
+        ref: 'User',
       },
       rating: {
         type: Number,
@@ -63,16 +62,12 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true,
       },
-      publicId: {
-        type: String,
-        required: true,
-      },
     },
   ],
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Reference to the User model
-    required: true, // Ensure every product is linked to a user
+    ref: 'User', 
+    required: true,
   },
   createdAt: {
     type: Date,

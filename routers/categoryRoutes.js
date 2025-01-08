@@ -13,6 +13,12 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
+    const { name } = req.body;
+    const categoryExisting = await Category.find({ name });
+    
+    if (categoryExisting.length > 0) {
+      return res.status(400).json({ message: "Category already exists" });
+    }
     const category = new Category(req.body);
     const savedCategory = await category.save();
     res.status(201).json({
@@ -21,9 +27,10 @@ router.post("/", async (req, res) => {
       message: "Category created successfully",
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
+
 router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
