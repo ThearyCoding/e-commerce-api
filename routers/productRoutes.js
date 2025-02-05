@@ -9,6 +9,24 @@ router.get("/", async (req, res) => {
     res.status(404).json({ error: error.message });
   }
 });
+router.get("/category/:categoryId", async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+
+    const products = await Product.find({ categoryId });
+
+    if (products.length === 0) {
+      return res.status(404).json({
+        error: "No products found for the specified category",
+      });
+    }
+
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 router.post("/", async (req, res) => {
   try {

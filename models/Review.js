@@ -21,11 +21,7 @@ const reviewSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    }
-});
+},{timestamps: true});
 
 const Review = mongoose.model('Review', reviewSchema);
 module.exports = Review;

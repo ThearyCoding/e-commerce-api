@@ -3,14 +3,12 @@ const router = express.Router();
 const Review = require('../models/Review');
 
 
-// get all review 
 router.get('/', async (req, res) => {
     const reviews = await Review.find();
 
     res.status(200).json(reviews);
 });
 
-// create a new review 
 router.post('/', async (req, res) =>{
     try {
         const { product, user, rating, comment } = req.body;
@@ -29,7 +27,6 @@ router.post('/', async (req, res) =>{
 });
 
 // Get reviews for a product
-
 router.get('/productId', async (req,res) => {
     try {
         const { productId } = req.params;

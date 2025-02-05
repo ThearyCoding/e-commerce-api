@@ -1,55 +1,88 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-
-// Define the schema
-const userSchema = new mongoose.Schema({
+const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
+const addressSchema = new mongoose.Schema({
+  street: { type: String },
+  city: { type: String },
+  country: { type: String },
+  postalCode: { type: String },
+  formattedAddress: { type: String },
+  latitude: { type: Number },
+  longitude: { type: Number },
+});
+const validateEmail = (email) => {
+  const regex = /^\S+@\S+\.\S+$/;
+  return regex.test(email);
+};
+const userSchema = new mongoose.Schema(
+  {
     name: {
-        type: String,
-        required: true,
-        trim: true,
+      type: String,
+      required: [true, "Name is required"],
+      trim: true,
     },
     email: {
-        type: String,
-        required: true,
-        unique: true,
-        lowercase: true,
-        trim: true,
+      type: String,
+      required: [true, "Email is required"],
+      unique: true,
+      lowercase: true,
+      trim: true,
+      validate: {
+        validator: validateEmail,
+        message: "Please enter a valid email address",
+      },
+    },
+    imageUrl: {
+      type: String,
     },
     password: {
-        type: String,
-        required: true,
-        minlength: 6,
+      type: String,
+      required: true,
+      minlength: 6,
+      trim: true,
     },
     role: {
-        type: String,
-        enum: ['admin', 'customer'],
-        default: 'customer',
+      type: String,
+      enum: ["admin", "customer"],
+      default: "customer",
     },
     isActive: {
-        type: Boolean,
-        default: true,
+      type: Boolean,
+      default: true,
     },
-    createdAt: {
-        type: Date,
-        default: Date.now,
+
+    shippingAddress: addressSchema,
+    billingAddress: addressSchema,
+    phoneNumber: {
+      type: String,
     },
-});
+    cart: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Cart",
+    },
+    wishlist: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Wishlist",
+    },
+    orders: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Order",
+      },
+    ],
+    dateOfBirth: {
+      type: Date,
+      required: false,
+    },
 
-// Middleware to hash the password before saving
-userSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next(); // Only hash if password is modified
+    socialMediaLinks: {
+      facebook: { type: String, required: false },
+      twitter: { type: String, required: false },
+      instagram: { type: String, required: false },
+      linkedIn: { type: String, required: false },
+    },
+  },
+  { timestamps: true }
+);
 
-    try {
-        const salt = await bcrypt.genSalt(10);
-        this.password = await bcrypt.hash(this.password, salt); // Hash the password
-        next();
-    } catch (error) {
-        next(error);
-    }
-});
-
-// Create the model
-const User = mongoose.model('User', userSchema);
-
-// Export the model
+const User = mongoose.model("User", userSchema);
 module.exports = User;

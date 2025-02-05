@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const orderschema = mongoose.Schema({
+const orderSchema = mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -18,13 +18,12 @@ const orderschema = mongoose.Schema({
                 required: true,
                 default: 1,
             },
-            price:{
+            price: {
                 type: Number,
                 required: true,
             },
         },
     ],
-
     totalAmount: {
         type: Number,
         required: true,
@@ -40,12 +39,16 @@ const orderschema = mongoose.Schema({
         country: String,
         postalCode: String,
     },
+    riderLocation: {
+        type: { type: String, default: 'Point' },
+        coordinates: { type: [Number], default: [0, 0] },
+    },
     createdAt: {
         type: Date,
         default: Date.now,
     }
 });
-
-const Order = mongoose.model('Order', orderschema);
+orderSchema.index({ riderLocation: '2dsphere' });
+const Order = mongoose.model('Order', orderSchema);
 
 module.exports = Order;

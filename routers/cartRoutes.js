@@ -1,17 +1,19 @@
 const express = require("express");
 const Cart = require("../models/Cart");
+const User = require("../models/User");
+const authMiddleware = require("../Middleware/auth-middlewar");
 const router = express.Router();
 
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
   try {
     const { items } = req.body;
-    const user = req.user.id;
+    const userId = req.user.id;
 
-    if (!user || !items || !items[0].product || !items[0].quantity) {
+    if (!userId || !items || !items[0].product || !items[0].quantity) {
       return res.status(400).json({ message: "Invalid payload" });
     }
 
-    let cart = await Cart.findOne({ user });
+    let cart = await Cart.findOne({ user: userId });
 
     if (cart) {
       // Check if product already exists in the cart
@@ -31,7 +33,7 @@ router.post("/", async (req, res) => {
       }
     } else {
       cart = new Cart({
-        user,
+        user: userId,
         items: [
           {
             product: items[0].product,
@@ -39,16 +41,18 @@ router.post("/", async (req, res) => {
           },
         ],
       });
+
+      // Save cart reference in user document
+      await User.findByIdAndUpdate(userId, { cart: cart._id });
     }
 
     const savedCart = await cart.save();
     res.status(201).json(savedCart);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error creating/updating cart", error: error.message });
+    res.status(500).json({ message: "Error creating/updating cart", error: error.message });
   }
 });
+
 
 router.get("/", async (req, res) => {
   try {
@@ -108,6 +112,28 @@ router.patch("/:cartId/items/:itemId", async (req, res) => {
     res
       .status(500)
       .json({ message: "Error updating cart item", error: error.message });
+  }
+});
+
+router.delete("/:cartId", async (req, res) => {
+  try {
+    const { cartId } = req.params;
+
+    if (!cartId) {
+      return res.status(400).json({ message: "Cart ID is required" });
+    }
+
+    const cart = await Cart.findByIdAndDelete(cartId);
+
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    return res.status(200).json({ message: "Cart deleted successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error deleting cart", error: error.message });
   }
 });
 
