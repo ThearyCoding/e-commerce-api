@@ -2,12 +2,18 @@ const express = require("express");
 require("dotenv").config();
 require("./config/db");
 const app = express();
-
 const authMiddleware = require("./Middleware/auth-middlewar");
 
 const PORT = process.env.PORT || 3000;
 const Order = require("./models/Order");
 app.use(express.json());
+
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
 app.use("/api/products", authMiddleware, require("./routers/productRoutes"));
 app.use("/api/categories", authMiddleware, require("./routers/categoryRoutes"));
 app.use("/api/users", require("./routers/userRoutes"));
@@ -40,8 +46,6 @@ wss.on('connection', (ws) => {
         const { orderId, latitude, longitude } = data;
 
         console.log(`Updated location for order ${orderId}: ${latitude}, ${longitude}`);
-
-        // Broadcast the location update to all user clients for this order
         users.forEach((client) => {
           if (client.readyState === WebSocket.OPEN) {
             client.send(
