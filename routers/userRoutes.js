@@ -10,8 +10,8 @@ const { handleValidationError } = require("../utils/errorHandler");
 
 router.post("/", authMiddleware, async (req, res) => {
   try {
-    const { items } = req.body;
-    const userId = req.user.id;
+    const { items, user } = req.body;
+    const userId = user.id;
 
     if (!userId || !items || !items[0].product || !items[0].quantity) {
       return res.status(400).json({ message: "Invalid payload" });
@@ -58,7 +58,7 @@ router.post("/", authMiddleware, async (req, res) => {
       .json({ message: "Error creating/updating cart", error: error.message });
   }
 });
-router.post("/register", async (req, res) => {
+router.post("/register", apiSecretMiddleware, async (req, res) => {
   try {
     const existingUser = await User.findOne({ email: req.body.email });
     if (existingUser) {
@@ -146,18 +146,9 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/:id", authMiddleware, async (req, res) => {
+router.get("/profile", authMiddleware, async (req, res) => {
   try {
-    const { id } = req.params;
-    const userIdFromToken = req.user.id;
-
-    if (userIdFromToken !== id && req.user.role !== "admin") {
-      return res
-        .status(403)
-        .json({ error: "You are not authorized to view this user" });
-    }
-
-    const user = await User.findById(id);
+    const user = await User.findById(req.user.id);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -170,28 +161,33 @@ router.get("/:id", authMiddleware, async (req, res) => {
   }
 });
 
-router.delete("/:id", authMiddleware, async (req, res) => {
-  const { id } = req.params;
-  const user = await User.findByIdAndDelete(id);
+router.delete("/", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.user.id);
 
-  if (!user) {
-    return res.status(404).json({ error: "User not found" });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "User has been deleted successfully",
+      data: user,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
   }
-
-  res
-    .status(200)
-    .json({ message: "User have been delete sucessfully", data: user });
 });
 
-router.put("/:id", authMiddleware, async (req, res) => {
+router.put("/", authMiddleware, async (req, res) => {
   try {
-    const { id } = req.params;
     const updatedData = req.body;
+
     if (updatedData.name && updatedData.name.trim() === "") {
       return res.status(400).json({ error: "Name cannot be empty" });
     }
 
-    const user = await User.findByIdAndUpdate(id, updatedData, {
+    const user = await User.findByIdAndUpdate(req.user.id, updatedData, {
       new: true,
       runValidators: true,
     });
