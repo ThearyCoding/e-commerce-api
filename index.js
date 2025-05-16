@@ -3,7 +3,7 @@ require("dotenv").config();
 require("./config/db");
 const app = express();
 const authMiddleware = require("./Middleware/auth-middlewar");
-
+const path = require("path");
 const PORT = process.env.PORT || 3000;
 const Order = require("./models/Order");
 app.use(express.json());
@@ -19,7 +19,9 @@ app.use((req, res, next) => {
 
   next();
 });
-
+app.use("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 app.use("/api/products", authMiddleware, require("./routers/productRoutes"));
 app.use("/api/categories", authMiddleware, require("./routers/categoryRoutes"));
 app.use("/api/users", require("./routers/userRoutes"));
