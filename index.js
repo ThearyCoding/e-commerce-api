@@ -19,7 +19,9 @@ app.use((req, res, next) => {
 
   next();
 });
-app.use("/", (req, res) => {
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 app.use("/api/products", authMiddleware, require("./routers/productRoutes"));

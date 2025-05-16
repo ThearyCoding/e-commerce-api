@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
 const addressSchema = new mongoose.Schema({
   street: { type: String },
   city: { type: String },
