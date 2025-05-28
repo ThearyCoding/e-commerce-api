@@ -1,5 +1,5 @@
 const apiConfig = {
-  baseUrl: "https://e-commerce-api-84qw.onrender.com/api",
+  baseUrl: "https://e-commerce-api-24yv.onrender.com//api",
   authentication: {
     description:
       "Most endpoints require authentication. Include your API key in the request header.",
@@ -10,7 +10,7 @@ const apiConfig = {
       id: "base-url",
       title: "Base URL",
       type: "simple",
-      content: "https://e-commerce-api-84qw.onrender.com/api",
+      content: "https://e-commerce-api-24yv.onrender.com//api",
       showInNav: true,
     },
     {
