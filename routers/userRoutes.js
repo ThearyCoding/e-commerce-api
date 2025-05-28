@@ -73,7 +73,7 @@ router.post("/register", apiSecretMiddleware, async (req, res) => {
     const token = jwt.sign(
       { id: savedUser._id, role: savedUser.role },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "7d" }
     );
     res.status(201).json({
       message: "User registered successfully",
@@ -115,7 +115,7 @@ router.post("/login", apiSecretMiddleware, async (req, res) => {
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "7d" }
     );
 
     res.status(201).json({
