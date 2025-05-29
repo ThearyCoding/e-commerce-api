@@ -25,13 +25,13 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 app.use("/api/products", authMiddleware, require("./routers/productRoutes"));
-app.use("/api/categories", authMiddleware, require("./routers/categoryRoutes"));
+app.use("/api/categories", require("./routers/categoryRoutes"));
 app.use("/api/users", require("./routers/userRoutes"));
 app.use("/api/orders", authMiddleware, require("./routers/orderRoutes"));
 app.use("/api/carts", authMiddleware, require("./routers/cartRoutes"));
 app.use("/api/reviews", authMiddleware, require("./routers/reviewRoutes"));
 app.use("/api/wishlists", authMiddleware, require("./routers/wishlistRoutes"));
-
+app.use("/api/brands", require("./routers/brand.routes"));
 
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: 8080 });
