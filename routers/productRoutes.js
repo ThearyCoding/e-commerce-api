@@ -187,11 +187,6 @@ router.get("/my-products", async (req, res) => {
       .populate({ path: "categoryId", select: "name" })
       .populate({ path: "brand", select: "name" });
 
-    if (products.length === 0) {
-      return res.status(404).json({
-        error: "No products found.",
-      });
-    }
     const stats = await Product.aggregate([
       { $match: { createdBy: new mongoose.Types.ObjectId(createdBy) } },
       {
