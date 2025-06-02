@@ -36,12 +36,80 @@ const apiConfig = {
           path: "/api/products",
           requiresAuth: true,
           title: "Get All Products",
-          description: "Retrieve a list of all products.",
+          description:
+            "Retrieve a paginated list of products with filtering, sorting, and searching capabilities.",
+          queryParameters: [
+            {
+              name: "search",
+              type: "string",
+              description:
+                "Search term to filter products by name, description, or brand",
+              required: false,
+            },
+            {
+              name: "categoryId",
+              type: "string",
+              description: "Filter products by category ID",
+              required: false,
+            },
+            {
+              name: "brand",
+              type: "string",
+              description: "Filter products by brand name",
+              required: false,
+            },
+            {
+              name: "minPrice",
+              type: "number",
+              description: "Minimum price filter",
+              required: false,
+            },
+            {
+              name: "maxPrice",
+              type: "number",
+              description: "Maximum price filter",
+              required: false,
+            },
+            {
+              name: "sort",
+              type: "string",
+              description: "Sort field (prefix with '-' for descending)",
+              required: false,
+            },
+            {
+              name: "page",
+              type: "number",
+              description: "Page number (default: 1)",
+              required: false,
+            },
+            {
+              name: "limit",
+              type: "number",
+              description: "Number of items per page (default: 10)",
+              required: false,
+            },
+            {
+              name: "ratings",
+              type: "number",
+              description: "Filter products by minimum rating",
+              required: false,
+            },
+            {
+              name: "topSelling",
+              type: "boolean",
+              description: "Set to 'true' to sort by top selling products",
+              required: false,
+            },
+          ],
           response: {
             success: true,
-            data: [
+            total: 100,
+            currentPage: 1,
+            totalPages: 10,
+            count: 10,
+            products: [
               {
-                id: "123",
+                _id: "123",
                 name: "Laptop",
                 description: "High-performance laptop",
                 price: 899.99,
@@ -69,11 +137,23 @@ const apiConfig = {
               name: "categoryId",
               type: "string",
               description: "The ID of the category",
+              required: true,
             },
           ],
           response: {
             success: true,
-            data: [],
+            data: [
+              {
+                _id: "123",
+                name: "Laptop",
+                description: "High-performance laptop",
+                price: 899.99,
+                categoryId: "electronics123",
+                brand: "Dell",
+                stock: 20,
+                images: [{ url: "https://example.com/image1.jpg" }],
+              },
+            ],
           },
         },
         {
@@ -81,28 +161,57 @@ const apiConfig = {
           path: "/api/products",
           requiresAuth: true,
           title: "Create Product",
-          description: "Create a new product.",
+          description: "Create a new product with image uploads.",
+          consumes: ["multipart/form-data"],
           parameters: [
-            { name: "name", type: "string", description: "Product name" },
+            {
+              name: "images",
+              type: "file[]",
+              description: "Product images",
+              required: true,
+            },
+            {
+              name: "name",
+              type: "string",
+              description: "Product name",
+              required: true,
+            },
             {
               name: "description",
               type: "string",
               description: "Product description",
+              required: false,
             },
-            { name: "price", type: "number", description: "Product price" },
-            { name: "categoryId", type: "string", description: "Category ID" },
-            { name: "brand", type: "string", description: "Product brand" },
-            { name: "stock", type: "number", description: "Product stock" },
             {
-              name: "images",
-              type: "array",
-              description: "Array of image URLs",
+              name: "price",
+              type: "number",
+              description: "Product price",
+              required: true,
+            },
+            {
+              name: "categoryId",
+              type: "string",
+              description: "Category ID",
+              required: true,
+            },
+            {
+              name: "brand",
+              type: "string",
+              description: "Product brand",
+              required: false,
+            },
+            {
+              name: "stock",
+              type: "number",
+              description: "Product stock quantity",
+              required: false,
             },
           ],
           response: {
             success: true,
+            message: "Product created successfully",
             data: {
-              id: "123",
+              _id: "123",
               name: "New Product",
               description: "Created product",
               price: 100,
@@ -111,6 +220,7 @@ const apiConfig = {
               stock: 100,
               images: [{ url: "https://example.com/img.jpg" }],
               createdBy: "userId",
+              createdAt: "2025-01-01T12:00:00Z",
             },
           },
         },
@@ -121,15 +231,36 @@ const apiConfig = {
           title: "Update Product",
           description: "Update a product you created.",
           parameters: [
-            { name: "id", type: "string", description: "Product ID" },
-            { name: "body", type: "object", description: "Fields to update" },
+            {
+              name: "id",
+              type: "string",
+              description: "Product ID",
+              required: true,
+            },
+            {
+              name: "body",
+              type: "object",
+              description: "Fields to update",
+              required: true,
+              schema: {
+                name: { type: "string", required: false },
+                description: { type: "string", required: false },
+                price: { type: "number", required: false },
+                categoryId: { type: "string", required: false },
+                brand: { type: "string", required: false },
+                stock: { type: "number", required: false },
+                isActive: { type: "boolean", required: false },
+              },
+            },
           ],
           response: {
+            success: true,
             message: "Product updated successfully",
             data: {
-              id: "123",
+              _id: "123",
               name: "Updated Name",
               price: 199.99,
+              updatedAt: "2025-01-10T15:30:00Z",
             },
           },
         },
@@ -140,16 +271,252 @@ const apiConfig = {
           title: "Delete Product",
           description: "Delete a product you created.",
           parameters: [
-            { name: "id", type: "string", description: "Product ID" },
+            {
+              name: "id",
+              type: "string",
+              description: "Product ID",
+              required: true,
+            },
           ],
           response: {
+            success: true,
             message: "Product deleted successfully",
-            products: {
-              id: "123",
+            data: {
+              _id: "123",
               name: "Deleted Product",
             },
           },
         },
+        {
+          method: "GET",
+          path: "/api/products/my-products",
+          requiresAuth: true,
+          title: "Get My Products",
+          description:
+            "Retrieve all products created by the current user with statistics.",
+          response: {
+            success: true,
+            data: {
+              products: [
+                {
+                  _id: "123",
+                  name: "My Product",
+                  price: 99.99,
+                  categoryId: { _id: "cat123", name: "Electronics" },
+                  brand: "My Brand",
+                  stock: 10,
+                  isActive: true,
+                },
+              ],
+              stats: {
+                totalProducts: 5,
+                totalStock: 50,
+                outOfStock: 1,
+                inStock: 4,
+                activeProducts: 4,
+                inactiveProducts: 1,
+              },
+            },
+          },
+        },
+      ],
+    },
+    {
+      id: "brands",
+      title: "Brands",
+      type: "endpoints",
+      showInNav: true,
+      endpoints: [
+        {
+          method: "GET",
+          path: "/api/brands",
+          requiresAuth: true,
+          title: "Get All Brands",
+          description:
+            "Retrieve all brands created by the current user with product count statistics.",
+          response: {
+            success: true,
+            data: [
+              {
+                _id: "5f8d8f7d8f7d8f7d8f7d8f7d",
+                name: "Example Brand",
+                description: "Brand description",
+                image:
+                  "https://res.cloudinary.com/example/image/upload/v1234567890/brand.jpg",
+                totalProducts: 15,
+                createdAt: "2025-01-01T00:00:00.000Z",
+                updatedAt: "2025-01-01T00:00:00.000Z",
+              },
+            ],
+          },
+        },
+        {
+          method: "GET",
+          path: "/api/brands/:id",
+          requiresAuth: true,
+          title: "Get Brand by ID",
+          description:
+            "Retrieve a specific brand by its ID (only if created by the current user).",
+          parameters: [
+            {
+              name: "id",
+              type: "string",
+              description: "Brand ID",
+              required: true,
+            },
+          ],
+          response: {
+            success: true,
+            data: {
+              _id: "5f8d8f7d8f7d8f7d8f7d8f7d",
+              name: "Example Brand",
+              description: "Brand description",
+              image:
+                "https://res.cloudinary.com/example/image/upload/v1234567890/brand.jpg",
+              createdBy: "5f8d8f7d8f7d8f7d8f7d8f7d",
+              createdAt: "2025-01-01T00:00:00.000Z",
+              updatedAt: "2025-01-01T00:00:00.000Z",
+            },
+          },
+          errorResponse: {
+            status: 404,
+            error: "Brand not found",
+          },
+        },
+        {
+          method: "POST",
+          path: "/api/brands",
+          requiresAuth: true,
+          title: "Create Brand",
+          description: "Create a new brand with optional image upload.",
+          consumes: ["multipart/form-data"],
+          parameters: [
+            {
+              name: "images",
+              type: "file[]",
+              description:
+                "Brand image (first image will be used if multiple are provided)",
+              required: false,
+            },
+            {
+              name: "name",
+              type: "string",
+              description: "Brand name",
+              required: true,
+            },
+            {
+              name: "description",
+              type: "string",
+              description: "Brand description",
+              required: false,
+            },
+          ],
+          response: {
+            success: true,
+            data: {
+              _id: "5f8d8f7d8f7d8f7d8f7d8f7d",
+              name: "New Brand",
+              description: "Brand description",
+              image:
+                "https://res.cloudinary.com/example/image/upload/v1234567890/brand.jpg",
+              createdBy: "5f8d8f7d8f7d8f7d8f7d8f7d",
+              createdAt: "2025-01-01T00:00:00.000Z",
+              updatedAt: "2025-01-01T00:00:00.000Z",
+            },
+          },
+          errorResponse: {
+            status: 400,
+            error: "Validation error message",
+          },
+        },
+        {
+          method: "PUT",
+          path: "/api/brands/:id",
+          requiresAuth: true,
+          title: "Update Brand",
+          description:
+            "Update an existing brand (only if created by the current user). Supports image update.",
+          consumes: ["multipart/form-data"],
+          parameters: [
+            {
+              name: "id",
+              type: "string",
+              description: "Brand ID",
+              required: true,
+            },
+            {
+              name: "images",
+              type: "file[]",
+              description:
+                "New brand image (first image will be used if multiple are provided)",
+              required: false,
+            },
+            {
+              name: "name",
+              type: "string",
+              description: "Updated brand name",
+              required: false,
+            },
+            {
+              name: "description",
+              type: "string",
+              description: "Updated brand description",
+              required: false,
+            },
+          ],
+          response: {
+            success: true,
+            data: {
+              _id: "5f8d8f7d8f7d8f7d8f7d8f7d",
+              name: "Updated Brand",
+              description: "Updated description",
+              image:
+                "https://res.cloudinary.com/example/image/upload/v1234567890/new_brand.jpg",
+              createdBy: "5f8d8f7d8f7d8f7d8f7d8f7d",
+              createdAt: "2025-01-01T00:00:00.000Z",
+              updatedAt: "2025-01-02T00:00:00.000Z",
+            },
+          },
+          errorResponses: [
+            {
+              status: 404,
+              error: "Brand not found",
+            },
+            {
+              status: 400,
+              error: "Validation error message",
+            },
+          ],
+        },
+        {
+          method: "DELETE",
+          path: "/api/brands/:id",
+          requiresAuth: true,
+          title: "Delete Brand",
+          description: "Delete a brand (only if created by the current user).",
+          parameters: [
+            {
+              name: "id",
+              type: "string",
+              description: "Brand ID",
+              required: true,
+            },
+          ],
+          response: {
+            success: true,
+            message: "Brand deleted successfully",
+          },
+          errorResponse: {
+            status: 404,
+            error: "Brand not found",
+          },
+        },
+      ],
+      notes: [
+        "All endpoints require authentication",
+        "Image uploads are processed through Cloudinary",
+        "Brands are user-specific - users can only access brands they created",
+        "The GET /brands endpoint includes product count statistics for each brand",
       ],
     },
     {
