@@ -7,8 +7,8 @@ const upload = multer();
 router.use(authMiddleware);
 router.get("/", brandController.getBrands);
 router.get("/:id", brandController.getBrandById);
-router.post("/", authMiddleware, upload.array("images"), brandController.createBrand);
-router.put("/:id", authMiddleware, upload.array("images"), brandController.updateBrand);
+router.post("/", upload.array("images"), brandController.createBrand);
+router.put("/:id", upload.array("images"), brandController.updateBrand);
 router.delete("/:id", brandController.deleteBrand);
 
 module.exports = router;
