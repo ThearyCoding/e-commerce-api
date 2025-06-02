@@ -1,5 +1,5 @@
 const apiConfig = {
-  baseUrl: "https://e-commerce-api-24yv.onrender.com//api",
+  baseUrl: "https://e-commerce-api-24yv.onrender.com/api",
   authentication: {
     description:
       "Most endpoints require authentication. Include your API key in the request header.",
@@ -10,7 +10,7 @@ const apiConfig = {
       id: "base-url",
       title: "Base URL",
       type: "simple",
-      content: "https://e-commerce-api-24yv.onrender.com//api",
+      content: "https://e-commerce-api-24yv.onrender.com/api",
       showInNav: true,
     },
     {
@@ -528,11 +528,13 @@ const apiConfig = {
         {
           method: "GET",
           path: "/api/categories",
-          requiresAuth: false,
+          requiresAuth: true,
           title: "Get All Categories",
-          description: "Retrieve a list of all product categories.",
+          description:
+            "Retrieve a list of all product categories created by the authenticated user.",
           response: {
             success: true,
+            count: 1,
             data: [
               {
                 id: "60f8c8b2a4d3f9b9c8d7e3e9",
@@ -540,6 +542,7 @@ const apiConfig = {
                 description: "Electronic gadgets and devices",
                 parenCategory: null,
                 isActive: true,
+                createdBy: "user_id",
                 createdAt: "2023-01-01T00:00:00.000Z",
               },
             ],
@@ -560,12 +563,13 @@ const apiConfig = {
           response: {
             success: true,
             message: "Category created successfully",
-            category: {
+            data: {
               id: "60f8c8b2a4d3f9b9c8d7e3e9",
               name: "Electronics",
               description: "Electronic gadgets and devices",
               parenCategory: null,
               isActive: true,
+              createdBy: "user_id",
               createdAt: "2023-01-01T00:00:00.000Z",
             },
           },
@@ -585,12 +589,13 @@ const apiConfig = {
           response: {
             success: true,
             message: "Category updated successfully",
-            category: {
+            data: {
               id: "60f8c8b2a4d3f9b9c8d7e3e9",
               name: "Updated Category",
               description: "Updated description",
               parenCategory: null,
               isActive: true,
+              createdBy: "user_id",
               createdAt: "2023-01-01T00:00:00.000Z",
             },
           },
@@ -604,12 +609,13 @@ const apiConfig = {
           response: {
             success: true,
             message: "Category deleted successfully",
-            category: {
+            data: {
               id: "60f8c8b2a4d3f9b9c8d7e3e9",
               name: "Electronics",
               description: "Electronic gadgets and devices",
               parenCategory: null,
               isActive: true,
+              createdBy: "user_id",
               createdAt: "2023-01-01T00:00:00.000Z",
             },
           },

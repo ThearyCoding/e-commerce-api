@@ -11,20 +11,33 @@ const categorySchema = new mongoose.Schema({
         type: String,
         default: '',
     },
-    parenCategory: {
+    parentCategory: {  
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category',
         default: null,
     },
-    isActive:{
+    isActive: {
         type: Boolean,
         default: true,
     },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     createdAt: {
         type: Date,
-        default: Date.now(),
+        default: Date.now,
     },
+    updatedAt: {
+        type: Date,
+        default: Date.now,
+    }
+});
 
+categorySchema.pre('save', function(next) {
+    this.updatedAt = Date.now();
+    next();
 });
 
 const Category = mongoose.model('Category', categorySchema);
