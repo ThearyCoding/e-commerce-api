@@ -2,33 +2,32 @@ const Brand = require("../models/Brand");
 const cloudinary = require("../config/cloudinary");
 const streamifier = require("streamifier");
 const mongoose = require("mongoose");
-const Product = require("../models/Product");
+
+// Helper for uploading buffer to Cloudinary
+const uploadFromBuffer = (buffer) =>
+  new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { resource_type: "image" },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+    streamifier.createReadStream(buffer).pipe(uploadStream);
+  });
 
 exports.createBrand = async (req, res) => {
   try {
-    const uploadFromBuffer = (buffer) =>
-      new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          { resource_type: "image" },
-          (error, result) => {
-            if (error) return reject(error);
-            resolve(result);
-          }
-        );
-        streamifier.createReadStream(buffer).pipe(uploadStream);
-      });
-
-    let images = [];
-    if (req.files && req.files.length > 0) {
-      const uploadResults = await Promise.all(
-        req.files.map((file) => uploadFromBuffer(file.buffer))
-      );
-      images = uploadResults.map((result) => ({ url: result.secure_url }));
+    let imageUrl;
+    if (req.file) {
+      const uploadResult = await uploadFromBuffer(req.file.buffer);
+      imageUrl = uploadResult.secure_url;
     }
+
     const brand = new Brand({
       ...req.body,
       createdBy: req.user.id,
-      image: images.length > 0 ? images[0].url : undefined,
+      image: imageUrl,
     });
 
     const savedBrand = await brand.save();
@@ -106,20 +105,8 @@ exports.updateBrand = async (req, res) => {
   try {
     let updatedData = { ...req.body };
 
-    if (req.files && req.files.length > 0) {
-      const uploadFromBuffer = (buffer) =>
-        new Promise((resolve, reject) => {
-          const uploadStream = cloudinary.uploader.upload_stream(
-            { resource_type: "image" },
-            (error, result) => {
-              if (error) return reject(error);
-              resolve(result);
-            }
-          );
-          streamifier.createReadStream(buffer).pipe(uploadStream);
-        });
-
-      const uploadResult = await uploadFromBuffer(req.files[0].buffer);
+    if (req.file) {
+      const uploadResult = await uploadFromBuffer(req.file.buffer);
       updatedData.image = uploadResult.secure_url;
     }
 
