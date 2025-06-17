@@ -3,8 +3,8 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const Category = require("../models/Category");
 const Product = require("../models/Product");
-
-router.get("/", async (req, res) => {
+const authMiddleware = require("../Middleware/auth-middlewar");
+router.get("/", authMiddleware, async (req, res) => {
   try {
     const userId = new mongoose.Types.ObjectId(req.user.id);
 
@@ -64,7 +64,7 @@ router.get("/", async (req, res) => {
 });
 
 // Create a category
-router.post("/", async (req, res) => {
+router.post("/",authMiddleware, async (req, res) => {
   try {
     const { name } = req.body;
 
@@ -102,7 +102,7 @@ router.post("/", async (req, res) => {
 });
 
 // Update category
-router.put("/:id", async (req, res) => {
+router.put("/:id", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -139,7 +139,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // Delete category
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
 
