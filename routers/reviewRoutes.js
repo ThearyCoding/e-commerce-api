@@ -26,7 +26,6 @@ router.post('/', async (req, res) =>{
     }
 });
 
-// Get reviews for a product
 router.get('/productId', async (req,res) => {
     try {
         const { productId } = req.params;
